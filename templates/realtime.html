@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='chat.css')}}">
+
+
+
+    <title>Chat Avanzado</title>
+
+
+</head>
+
+<body>
+
+    <h1>Chat Avanzado</h1>
+    <form id="formulario_mensaje">
+        <label for="">Nombre: </label>
+        <input type="text" id="nombre" name="nombre" value="{{nombre}}" required>
+        <br>
+        <label for="">Nuevo mensaje</label>
+        <input type="text" id="nuevo_mensaje" name="nuevo_mensaje" required>
+        <br>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <!--TODO Lista de mensajes-->
+    <ul id="lista-mensajes">
+        {% for mensaje in mensajes %}
+        <!--TODO Renderizar cada mensaje en la lista-->
+        <li>{{mensaje}}</li>
+        {% endfor %}
+    </ul>
+</body>
+
+<!--TODO Inclusion de la biblioteca Socket.IO-->
+
+<script src="https://cdn.socket.io/4.8.0/socket.io.min.js"
+    integrity="sha384-OoIbkvzsFFQAG88r+IqMAjyOtYDPGO0cqK5HF5Uosdy/zUEGySeAzytENMDynREd"
+    crossorigin="anonymous"></script>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let socket = io.connect("http://" + document.domain + ":" + location.port)
+
+        //TODO Escuchar el evento "actualizar_mensajes" desde el servidor
+
+        socket.on("actualizar_mensajes", function (data) {
+            let listamensajes = document.getElementById("lista-mensajes")
+            let nuevomensaje = document.createElement("li")
+            nuevomensaje.textContent = data.nombre + ":" + data.mensaje
+            listamensajes.appendChild(nuevomensaje)
+
+        })
+        //TODO Obtener el formulario y agregar un evneto de escucha para el evento de envio
+        
+        let formulario = document.getElementById("formulario_mensaje")
+        formulario.addEventListener("submit", function (event) {
+            //TODO Evitar que le formulario se envie de manera predeterminada
+            event.preventDefault();
+
+            let nombre = document.getElementById("nombre").value;
+            let nuevo_mensaje = document.getElementById("nuevo_mensaje").value;
+
+
+            socket.emit("mensaje", { "nombre": nombre, "mensaje": nuevo_mensaje })
+
+            document.getElementById("nuevo_mensaje").value = " ";
+        })
+    })
+
+</script>
+
+</html>
